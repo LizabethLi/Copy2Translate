@@ -1,0 +1,24 @@
+{
+  "name": "tap2translate",
+  "version": "1.0.0",
+  "main": "main.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "electron .",
+    "dev": "electron ."
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "axios": "^1.8.2",
+    "clipboardy": "^4.0.0",
+    "dotenv": "^16.4.5",
+    "electron": "^35.0.0",
+    "electron-settings": "^4.0.2",
+    "https-proxy-agent": "^7.0.4",
+    "robotjs": "^0.6.0",
+    "settings": "^0.1.1"
+  }
+}

@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<title>快捷翻译工具</title>
+<link rel="stylesheet" href="styles.css">
+<script defer src="renderer.js"></script>
+</head>
+<body>
+<h1>快捷翻译工具</h1>
+
+<div class="settings-section">
+<h2>快捷键设置</h2>
+<p>当前快捷键: <span id="currentShortcut"></span></p>
+<input type="text" id="newShortcut" placeholder="输入新的快捷键">
+<button id="updateShortcutBtn">更改快捷键</button>
+</div>
+
+<div class="settings-section">
+<h2>翻译提示词设置</h2>
+<textarea id="promptInput" class="prompt-input"
+placeholder="设置翻译提示词，例如：Please translate this Chinese text to English, maintaining its professional tone:"></textarea>
+<button id="updatePromptBtn">保存提示词</button>
+</div>
+
+<div class="settings-section">
+<h2>翻译结果</h2>
+<textarea id="translatedText" rows="5" cols="40" readonly></textarea>
+</div>
+
+<!-- API Key 输入弹窗 -->
+<div id="apiKeyModal" class="modal">
+<div class="modal-content">
+<h2>设置 API Key</h2>
+<p>首次使用需要设置 API Key</p>
+<input type="password" id="apiKeyInput" placeholder="请输入 API Key">
+<button id="saveApiKeyBtn">保存</button>
+</div>
+</div>
+</body>
+</html>
