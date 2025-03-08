@@ -1,55 +1,671 @@
 body {
-    font-family: Arial, sans-serif;
-    text-align: center;
-    padding: 20px;
-    }
-    
-    h1 {
-    font-size: 20px;
-    }
-    
-    p {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f5f5f5;
+    color: #333;
+}
+
+/* 顶部标题栏 */
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 20px;
+    background-color: #fff;
+    border-bottom: 1px solid #eaeaea;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.app-title {
+    font-size: 22px;
+    font-weight: 600;
+    color: #1a73e8;
+}
+
+.header-actions {
+    display: flex;
+    gap: 10px;
+}
+
+.header-btn {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    padding: 8px 12px;
+    background-color: #f8f9fa;
+    border: 1px solid #dadce0;
+    border-radius: 4px;
     font-size: 14px;
-    }
-    
-    input {
-    padding: 5px;
-    width: 200px;
-    }
-    
-    button {
-    padding: 8px;
-    margin-top: 10px;
     cursor: pointer;
-    }
-    
-    .modal {
+    transition: background-color 0.2s;
+}
+
+.header-btn:hover {
+    background-color: #f1f3f4;
+}
+
+.btn-icon {
+    font-size: 16px;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 20px auto;
+    padding: 0 20px;
+}
+
+/* 顶部设置行 - 快捷键和当前提示词并排 */
+.top-settings-row {
+    display: flex;
+    gap: 20px;
+    margin-bottom: 20px;
+}
+
+.shortcut-section {
+    flex: 1;
+}
+
+.prompt-section {
+    flex: 2;
+}
+
+h2 {
+    font-size: 18px;
+    margin-bottom: 15px;
+    font-weight: 600;
+}
+
+input, select, textarea, button {
+    font-family: inherit;
+    border-radius: 4px;
+    border: 1px solid #ddd;
+    padding: 8px 12px;
+    font-size: 14px;
+}
+
+button {
+    cursor: pointer;
+    background-color: #f0f0f0;
+    transition: background-color 0.2s;
+}
+
+button:hover {
+    background-color: #e0e0e0;
+}
+
+.settings-section {
+    background-color: #fff;
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 20px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+/* 快捷键设置 */
+.shortcut-container {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.current-shortcut {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.shortcut-input-group {
+    display: flex;
+    gap: 10px;
+}
+
+.shortcut-input-group input {
+    flex: 1;
+}
+
+.update-btn {
+    background-color: #4285f4;
+    color: white;
+    border: none;
+    padding: 8px 15px;
+}
+
+.update-btn:hover {
+    background-color: #3367d6;
+}
+
+/* 翻译提示词 */
+.prompt-container {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.prompt-select-container {
+    width: 100%;
+}
+
+.prompt-select-container select {
+    width: 100%;
+}
+
+.prompt-input {
+    width: 100%;
+    height: 100px;
+    resize: vertical;
+}
+
+/* 提示词管理 */
+.prompt-management {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.prompts-list {
+    border: 1px solid #eee;
+    border-radius: 4px;
+}
+
+.prompt-item {
+    padding: 15px;
+    border-bottom: 1px solid #eee;
+    display: grid;
+    grid-template-columns: 1fr 2fr auto auto;
+    align-items: center;
+    gap: 15px;
+}
+
+.prompt-item:last-child {
+    border-bottom: none;
+}
+
+.prompt-item-name {
+    font-weight: 500;
+}
+
+.prompt-item-text {
+    color: #666;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.prompt-item-status {
+    color: #4285f4;
+    font-size: 12px;
+    padding: 4px 8px;
+    background-color: #e8f0fe;
+    border-radius: 4px;
+}
+
+.prompt-item-actions {
+    display: flex;
+    gap: 5px;
+}
+
+.edit-btn, .delete-btn {
+    background: none;
+    border: none;
+    padding: 5px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.edit-btn:hover, .delete-btn:hover {
+    background-color: #f0f0f0;
+}
+
+.add-prompt-btn {
+    align-self: flex-end;
+    background-color: white;
+    border: 1px solid #ddd;
+    padding: 8px 15px;
+}
+
+/* 翻译结果 */
+.translation-result-container {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.model-selection {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.model-selection select {
+    flex: 1;
+}
+
+.translation-result {
+    width: 100%;
+    height: 150px;
+    resize: vertical;
+}
+
+.translate-btn {
+    align-self: flex-end;
+    background-color: #4285f4;
+    color: white;
+    border: none;
+    padding: 8px 20px;
+}
+
+.translate-btn:hover {
+    background-color: #3367d6;
+}
+
+/* 弹窗 */
+.modal {
     display: none;
     position: fixed;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    background-color: rgba(0,0,0,0.5);
-    }
-    
-    .modal-content {
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 1000;
+}
+
+.modal-content {
     background-color: white;
-    margin: 15% auto;
+    margin: 10% auto;
+    padding: 25px;
+    width: 500px;
+    max-width: 90%;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.modal-content h2 {
+    margin-top: 0;
+}
+
+.modal-content input,
+.modal-content textarea {
+    width: 100%;
+}
+
+.modal-content textarea {
+    height: 100px;
+    resize: vertical;
+}
+
+.modal-buttons {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+#savePromptBtn {
+    background-color: #4285f4;
+    color: white;
+    border: none;
+}
+
+#savePromptBtn:hover {
+    background-color: #3367d6;
+}
+
+/* 暗色主题 */
+.dark-theme {
+    background-color: #1e1e1e;
+    color: #e0e0e0;
+}
+
+.dark-theme .header {
+    background-color: #252525;
+    border-bottom-color: #333;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+.dark-theme .app-title {
+    color: #4285f4;
+}
+
+.dark-theme .header-btn {
+    background-color: #333;
+    border-color: #444;
+    color: #e0e0e0;
+}
+
+.dark-theme .header-btn:hover {
+    background-color: #444;
+}
+
+.dark-theme .settings-section {
+    background-color: #252525;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+.dark-theme input, 
+.dark-theme select, 
+.dark-theme textarea {
+    background-color: #333;
+    border-color: #444;
+    color: #e0e0e0;
+}
+
+.dark-theme button {
+    background-color: #333;
+    color: #e0e0e0;
+}
+
+.dark-theme button:hover {
+    background-color: #444;
+}
+
+.dark-theme .update-btn,
+.dark-theme .translate-btn,
+.dark-theme #savePromptBtn {
+    background-color: #4285f4;
+    color: white;
+}
+
+.dark-theme .update-btn:hover,
+.dark-theme .translate-btn:hover,
+.dark-theme #savePromptBtn:hover {
+    background-color: #3367d6;
+}
+
+.dark-theme .prompts-list {
+    border-color: #444;
+}
+
+.dark-theme .prompt-item {
+    border-bottom-color: #444;
+}
+
+.dark-theme .prompt-item-text {
+    color: #aaa;
+}
+
+.dark-theme .prompt-item-status {
+    background-color: rgba(66, 133, 244, 0.2);
+}
+
+.dark-theme .edit-btn:hover, 
+.dark-theme .delete-btn:hover {
+    background-color: #444;
+}
+
+.dark-theme .add-prompt-btn {
+    background-color: #252525;
+    border-color: #444;
+}
+
+.dark-theme .modal-content {
+    background-color: #252525;
+}
+
+/* API Key 弹窗样式 */
+.api-key-modal {
+    width: 600px;
+    max-width: 95%;
+    padding: 30px;
+}
+
+.api-key-modal h2 {
+    font-size: 20px;
+    margin-bottom: 20px;
+    text-align: left;
+}
+
+.provider-selection p {
+    font-size: 16px;
+    margin-bottom: 15px;
+    text-align: left;
+}
+
+.provider-buttons {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 25px;
+}
+
+.provider-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 15px;
+    border: 1px solid #dadce0;
+    border-radius: 6px;
+    background-color: #f8f9fa;
+    font-size: 15px;
+    transition: all 0.2s;
+}
+
+.provider-btn.active {
+    border-color: #4285f4;
+    background-color: #e8f0fe;
+    color: #1a73e8;
+}
+
+.provider-icon {
+    font-size: 18px;
+}
+
+.provider-status {
+    font-size: 13px;
+    color: #5f6368;
+}
+
+.provider-status.status-set {
+    color: #34a853;
+}
+
+.provider-status.status-unset {
+    color: #ea4335;
+}
+
+.provider-btn.active .provider-status {
+    color: #1a73e8;
+}
+
+.provider-btn.active .provider-status.status-set {
+    color: #34a853;
+}
+
+.provider-btn.active .provider-status.status-unset {
+    color: #ea4335;
+}
+
+.setting-item input[placeholder="尚未设置 API Key"] {
+    color: #ea4335;
+    font-style: italic;
+}
+
+/* 暗色主题下的状态样式 */
+.dark-theme .provider-status.status-set {
+    color: #81c995;
+}
+
+.dark-theme .provider-status.status-unset {
+    color: #f28b82;
+}
+
+.dark-theme .provider-btn.active .provider-status.status-set {
+    color: #81c995;
+}
+
+.dark-theme .provider-btn.active .provider-status.status-unset {
+    color: #f28b82;
+}
+
+.dark-theme .setting-item input[placeholder="尚未设置 API Key"] {
+    color: #f28b82;
+}
+
+.provider-settings {
+    border: 1px solid #dadce0;
+    border-radius: 8px;
     padding: 20px;
-    width: 80%;
-    border-radius: 5px;
-    }
-    
-    .settings-section {
-    margin: 20px 0;
-    padding: 10px;
-    border-top: 1px solid #eee;
-    }
-    
-    textarea.prompt-input {
-    width: 90%;
-    height: 60px;
-    margin: 10px 0;
-    padding: 5px;
-    }
+    margin-bottom: 25px;
+    position: relative;
+}
+
+.provider-title {
+    font-size: 18px;
+    font-weight: 500;
+    margin-bottom: 20px;
+}
+
+.setup-btn {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    padding: 6px 12px;
+    background-color: #f8f9fa;
+    border: 1px solid #dadce0;
+    border-radius: 4px;
+    font-size: 14px;
+}
+
+.setting-item {
+    margin-bottom: 20px;
+}
+
+.setting-item label {
+    display: block;
+    font-size: 14px;
+    margin-bottom: 8px;
+    color: #5f6368;
+}
+
+.setting-item input {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid #dadce0;
+    border-radius: 4px;
+    font-size: 15px;
+}
+
+.setting-item input[readonly] {
+    background-color: #f8f9fa;
+}
+
+.password-input-container {
+    display: flex;
+    align-items: center;
+}
+
+.password-input-container input {
+    flex: 1;
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+}
+
+.toggle-password-btn {
+    padding: 10px 12px;
+    border: 1px solid #dadce0;
+    border-left: none;
+    border-radius: 0 4px 4px 0;
+    background-color: #f8f9fa;
+}
+
+.eye-icon {
+    font-size: 16px;
+}
+
+.modal-buttons {
+    display: flex;
+    justify-content: flex-end;
+    gap: 15px;
+}
+
+.cancel-btn {
+    padding: 10px 20px;
+    background-color: #f8f9fa;
+    border: 1px solid #dadce0;
+    border-radius: 4px;
+    font-size: 15px;
+}
+
+.save-btn {
+    padding: 10px 20px;
+    background-color: #1a73e8;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    font-size: 15px;
+}
+
+.save-btn:hover {
+    background-color: #1765cc;
+}
+
+/* 暗色主题下的API Key弹窗样式 */
+.dark-theme .api-key-modal {
+    background-color: #252525;
+}
+
+.dark-theme .provider-btn {
+    background-color: #333;
+    border-color: #444;
+    color: #e0e0e0;
+}
+
+.dark-theme .provider-btn.active {
+    border-color: #4285f4;
+    background-color: rgba(66, 133, 244, 0.2);
+    color: #4285f4;
+}
+
+.dark-theme .provider-status {
+    color: #aaa;
+}
+
+.dark-theme .provider-btn.active .provider-status {
+    color: #4285f4;
+}
+
+.dark-theme .provider-settings {
+    border-color: #444;
+}
+
+.dark-theme .setting-item label {
+    color: #aaa;
+}
+
+.dark-theme .setting-item input {
+    background-color: #333;
+    border-color: #444;
+    color: #e0e0e0;
+}
+
+.dark-theme .setting-item input[readonly] {
+    background-color: #2a2a2a;
+}
+
+.dark-theme .toggle-password-btn {
+    background-color: #333;
+    border-color: #444;
+    color: #e0e0e0;
+}
+
+.dark-theme .cancel-btn {
+    background-color: #333;
+    border-color: #444;
+    color: #e0e0e0;
+}
+
+.dark-theme .save-btn {
+    background-color: #4285f4;
+}
+
+.dark-theme .save-btn:hover {
+    background-color: #3367d6;
+}
+
+.hidden {
+    display: none !important;
+}

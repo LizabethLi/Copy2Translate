@@ -7,35 +7,182 @@
 <script defer src="renderer.js"></script>
 </head>
 <body>
-<h1>快捷翻译工具</h1>
-
-<div class="settings-section">
-<h2>快捷键设置</h2>
-<p>当前快捷键: <span id="currentShortcut"></span></p>
-<input type="text" id="newShortcut" placeholder="输入新的快捷键">
-<button id="updateShortcutBtn">更改快捷键</button>
+<div class="header">
+  <div class="app-title">快捷翻译工具</div>
+  <div class="header-actions">
+    <button id="apiKeyBtn" class="header-btn">
+      <span class="btn-icon">🔑</span>
+      API Key
+    </button>
+    <button id="themeToggleBtn" class="header-btn">
+      <span class="btn-icon">🌙</span>
+    </button>
+  </div>
 </div>
 
-<div class="settings-section">
-<h2>翻译提示词设置</h2>
-<textarea id="promptInput" class="prompt-input"
-placeholder="设置翻译提示词，例如：Please translate this Chinese text to English, maintaining its professional tone:"></textarea>
-<button id="updatePromptBtn">保存提示词</button>
-</div>
+<div class="container">
+  <div class="top-settings-row">
+    <div class="settings-section shortcut-section">
+      <h2>快捷键设置</h2>
+      <div class="shortcut-container">
+        <div class="current-shortcut">
+          <label>当前快捷键：</label>
+          <span id="currentShortcut"></span>
+        </div>
+        <div class="shortcut-input-group">
+          <input type="text" id="newShortcut" placeholder="输入新的快捷键">
+          <button id="updateShortcutBtn" class="update-btn">更改快捷键</button>
+        </div>
+      </div>
+    </div>
 
-<div class="settings-section">
-<h2>翻译结果</h2>
-<textarea id="translatedText" rows="5" cols="40" readonly></textarea>
+    <div class="settings-section prompt-section">
+      <h2>当前翻译提示词</h2>
+      <div class="prompt-container">
+        <div class="prompt-select-container">
+          <select id="promptSelect">
+            <option value="默认英文翻译">默认英文翻译</option>
+          </select>
+        </div>
+        <textarea id="promptInput" class="prompt-input" placeholder="Please translate this Chinese text to English, maintaining its professional tone:"></textarea>
+      </div>
+    </div>
+  </div>
+
+  <div class="settings-section">
+    <h2>提示词管理</h2>
+    <div class="prompt-management">
+      <div id="promptsList" class="prompts-list">
+        <div class="prompt-item">
+          <div class="prompt-item-name">默认英文翻译</div>
+          <div class="prompt-item-text">Please translate this Chinese text to English, maintaining its professional tone:</div>
+          <div class="prompt-item-status">当前使用中</div>
+          <div class="prompt-item-actions">
+            <button class="edit-btn"><img src="edit-icon.svg" alt="编辑"></button>
+            <button class="delete-btn"><img src="delete-icon.svg" alt="删除"></button>
+          </div>
+        </div>
+      </div>
+      <button id="addPromptBtn" class="add-prompt-btn">+ 添加提示词</button>
+    </div>
+  </div>
+
+  <div class="settings-section">
+    <h2>翻译结果</h2>
+    <div class="translation-result-container">
+      <div class="model-selection">
+        <label>当前使用：</label>
+        <select id="modelSelect">
+          <option value="openai/gpt-4o">OpenRouter (openai/gpt-4o)</option>
+        </select>
+      </div>
+      <textarea id="translatedText" class="translation-result" readonly placeholder="翻译结果将显示在这里..."></textarea>
+      <button id="translateBtn" class="translate-btn">模拟翻译</button>
+    </div>
+  </div>
 </div>
 
 <!-- API Key 输入弹窗 -->
 <div id="apiKeyModal" class="modal">
-<div class="modal-content">
-<h2>设置 API Key</h2>
-<p>首次使用需要设置 API Key</p>
-<input type="password" id="apiKeyInput" placeholder="请输入 API Key">
-<button id="saveApiKeyBtn">保存</button>
+  <div class="modal-content api-key-modal">
+    <h2>API Key 与模型管理</h2>
+    
+    <div class="provider-selection">
+      <p>选择翻译服务提供商：</p>
+      <div class="provider-buttons">
+        <button id="openRouterBtn" class="provider-btn active">
+          <span class="provider-icon">🌐</span>
+          OpenRouter <span class="provider-status"></span>
+        </button>
+        <button id="deepSeekBtn" class="provider-btn">
+          <span class="provider-icon">🔍</span>
+          DeepSeek <span class="provider-status"></span>
+        </button>
+      </div>
+    </div>
+    
+    <!-- OpenRouter设置面板 -->
+    <div class="provider-settings" id="openRouterSettings">
+      <div class="provider-title">OpenRouter</div>
+      <button class="setup-btn">设置</button>
+      
+      <div class="setting-item">
+        <label>当前 API Key:</label>
+        <div class="password-input-container">
+          <input type="password" id="currentApiKey" value="" readonly>
+          <button class="toggle-password-btn"><span class="eye-icon">👁️</span></button>
+        </div>
+      </div>
+      
+      <div class="setting-item">
+        <label>当前模型:</label>
+        <input type="text" id="currentModel" value="openai/gpt-4o" readonly>
+      </div>
+      
+      <div class="setting-item">
+        <label>更新您的 API Key</label>
+        <div class="password-input-container">
+          <input type="password" id="newApiKey" placeholder="输入 API Key">
+          <button class="toggle-password-btn"><span class="eye-icon">👁️</span></button>
+        </div>
+      </div>
+      
+      <div class="setting-item">
+        <label>模型名称:</label>
+        <input type="text" id="newModel" placeholder="openai/gpt-4o">
+      </div>
+    </div>
+    
+    <!-- DeepSeek设置面板 -->
+    <div class="provider-settings hidden" id="deepSeekSettings">
+      <div class="provider-title">DeepSeek</div>
+      <button class="setup-btn">设置</button>
+      
+      <div class="setting-item">
+        <label>当前 API Key:</label>
+        <div class="password-input-container">
+          <input type="password" id="currentDeepSeekApiKey" value="" readonly>
+          <button class="toggle-password-btn"><span class="eye-icon">👁️</span></button>
+        </div>
+      </div>
+      
+      <div class="setting-item">
+        <label>当前模型:</label>
+        <input type="text" id="currentDeepSeekModel" value="deepseek-chat" readonly>
+      </div>
+      
+      <div class="setting-item">
+        <label>更新您的 API Key</label>
+        <div class="password-input-container">
+          <input type="password" id="newDeepSeekApiKey" placeholder="输入 API Key">
+          <button class="toggle-password-btn"><span class="eye-icon">👁️</span></button>
+        </div>
+      </div>
+      
+      <div class="setting-item">
+        <label>模型名称:</label>
+        <input type="text" id="newDeepSeekModel" placeholder="deepseek-chat">
+      </div>
+    </div>
+    
+    <div class="modal-buttons">
+      <button id="cancelApiKeyBtn" class="cancel-btn">取消</button>
+      <button id="saveApiKeyBtn" class="save-btn">保存</button>
+    </div>
+  </div>
 </div>
+
+<!-- 添加提示词弹窗 -->
+<div id="addPromptModal" class="modal">
+  <div class="modal-content">
+    <h2>添加新提示词</h2>
+    <input type="text" id="newPromptName" placeholder="提示词名称">
+    <textarea id="newPromptText" placeholder="提示词内容"></textarea>
+    <div class="modal-buttons">
+      <button id="cancelAddPromptBtn">取消</button>
+      <button id="savePromptBtn">保存</button>
+    </div>
+  </div>
 </div>
 </body>
 </html>
