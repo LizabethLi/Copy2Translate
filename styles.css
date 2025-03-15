@@ -4,6 +4,7 @@ body {
     padding: 0;
     background-color: #f5f5f5;
     color: #333;
+    line-height: 1.5;
 }
 
 /* 顶部标题栏 */
@@ -11,38 +12,46 @@ body {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 15px 20px;
+    padding: 16px 24px;
     background-color: #fff;
-    border-bottom: 1px solid #eaeaea;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
-}
+    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+    max-width: 1147px;
+    margin: 0 auto;
+    box-sizing: border-box;
+}   
 
 .app-title {
-    font-size: 22px;
+    font-size: 24px;
     font-weight: 600;
     color: #1a73e8;
+    letter-spacing: -0.5px;
 }
 
 .header-actions {
     display: flex;
-    gap: 10px;
+    gap: 12px;
 }
 
 .header-btn {
     display: flex;
     align-items: center;
-    gap: 5px;
-    padding: 8px 12px;
+    gap: 6px;
+    padding: 8px 16px;
     background-color: #f8f9fa;
     border: 1px solid #dadce0;
-    border-radius: 4px;
+    border-radius: 6px;
     font-size: 14px;
+    font-weight: 500;
+    color: #5f6368;
     cursor: pointer;
-    transition: background-color 0.2s;
+    transition: all 0.2s ease;
 }
 
 .header-btn:hover {
     background-color: #f1f3f4;
+    border-color: #c6c6c6;
+    color: #202124;
 }
 
 .btn-icon {
@@ -51,15 +60,17 @@ body {
 
 .container {
     max-width: 1200px;
-    margin: 20px auto;
-    padding: 0 20px;
+    margin: 24px auto;
+    padding: 0 24px;
+    box-sizing: border-box;
 }
 
 /* 顶部设置行 - 快捷键和当前提示词并排 */
 .top-settings-row {
     display: flex;
-    gap: 20px;
-    margin-bottom: 20px;
+    gap: 24px;
+    margin-bottom: 24px;
+    box-sizing: border-box;
 }
 
 .shortcut-section {
@@ -72,34 +83,64 @@ body {
 
 h2 {
     font-size: 18px;
-    margin-bottom: 15px;
     font-weight: 600;
+    color: #202124;
+    margin: 0 0 20px 0;
+    letter-spacing: -0.3px;
 }
 
-input, select, textarea, button {
+/* 基础表单元素样式 */
+input, select, textarea {
     font-family: inherit;
-    border-radius: 4px;
-    border: 1px solid #ddd;
-    padding: 8px 12px;
+    border-radius: 8px;
+    border: 1.5px solid #dadce0;
+    padding: 10px 14px;
     font-size: 14px;
+    transition: all 0.2s ease;
+    background-color: #fff;
+    color: #202124;
+    box-sizing: border-box;
+}
+
+input:focus, select:focus, textarea:focus {
+    outline: none;
+    border-color: #1a73e8;
+    box-shadow: 0 0 0 2px rgba(26, 115, 232, 0.1);
 }
 
 button {
     cursor: pointer;
-    background-color: #f0f0f0;
-    transition: background-color 0.2s;
+    font-weight: 500;
+    transition: all 0.2s ease;
 }
 
-button:hover {
-    background-color: #e0e0e0;
+.update-btn, .translate-btn, .save-btn {
+    background-color: #1a73e8;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    transition: all 0.2s ease;
+}
+
+.update-btn:hover, .translate-btn:hover, .save-btn:hover {
+    background-color: #1557b0;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .settings-section {
     background-color: #fff;
-    border-radius: 8px;
-    padding: 20px;
-    margin-bottom: 20px;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    border-radius: 12px;
+    padding: 24px;
+    margin-bottom: 24px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+    transition: box-shadow 0.2s ease;
+}
+
+.settings-section:hover {
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.08);
 }
 
 /* 快捷键设置 */
@@ -124,13 +165,6 @@ button:hover {
     flex: 1;
 }
 
-.update-btn {
-    background-color: #4285f4;
-    color: white;
-    border: none;
-    padding: 8px 15px;
-}
-
 .update-btn:hover {
     background-color: #3367d6;
 }
@@ -140,6 +174,7 @@ button:hover {
     display: flex;
     flex-direction: column;
     gap: 15px;
+    width: 100%;
 }
 
 .prompt-select-container {
@@ -154,6 +189,7 @@ button:hover {
     width: 100%;
     height: 100px;
     resize: vertical;
+    box-sizing: border-box;
 }
 
 /* 提示词管理 */
@@ -169,35 +205,36 @@ button:hover {
 }
 
 .prompt-item {
-    padding: 15px;
+    padding: 16px;
     border-bottom: 1px solid #eee;
     display: grid;
     grid-template-columns: 1fr 2fr auto auto;
     align-items: center;
-    gap: 15px;
+    gap: 20px;
+    transition: background-color 0.2s ease;
 }
 
-.prompt-item:last-child {
-    border-bottom: none;
+.prompt-item:hover {
+    background-color: #f8f9fa;
 }
 
 .prompt-item-name {
     font-weight: 500;
+    color: #202124;
 }
 
 .prompt-item-text {
-    color: #666;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    color: #5f6368;
+    font-size: 14px;
 }
 
 .prompt-item-status {
-    color: #4285f4;
     font-size: 12px;
+    font-weight: 500;
     padding: 4px 8px;
+    border-radius: 12px;
     background-color: #e8f0fe;
-    border-radius: 4px;
+    color: #1a73e8;
 }
 
 .prompt-item-actions {
@@ -206,16 +243,23 @@ button:hover {
 }
 
 .edit-btn, .delete-btn {
-    background: none;
+    padding: 8px;
+    border-radius: 6px;
     border: none;
-    padding: 5px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    background: transparent;
+    transition: all 0.2s ease;
 }
 
 .edit-btn:hover, .delete-btn:hover {
-    background-color: #f0f0f0;
+    background-color: #f1f3f4;
+}
+
+.edit-btn svg, .delete-btn svg {
+    transition: all 0.2s ease;
+}
+
+.edit-btn:hover svg path, .delete-btn:hover svg path {
+    stroke: #202124;
 }
 
 .add-prompt-btn {
@@ -230,12 +274,14 @@ button:hover {
     display: flex;
     flex-direction: column;
     gap: 15px;
+    width: 100%;
 }
 
 .model-selection {
     display: flex;
     align-items: center;
     gap: 10px;
+    width: 100%;
 }
 
 .model-selection select {
@@ -246,6 +292,7 @@ button:hover {
     width: 100%;
     height: 150px;
     resize: vertical;
+    box-sizing: border-box;
 }
 
 .translate-btn {
@@ -292,6 +339,7 @@ button:hover {
 .modal-content input,
 .modal-content textarea {
     width: 100%;
+    box-sizing: border-box;
 }
 
 .modal-content textarea {
@@ -318,14 +366,13 @@ button:hover {
 
 /* 暗色主题 */
 .dark-theme {
-    background-color: #1e1e1e;
-    color: #e0e0e0;
+    background-color: #202124;
+    color: #e8eaed;
 }
 
 .dark-theme .header {
-    background-color: #252525;
-    border-bottom-color: #333;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+    background-color: #292a2d;
+    border-bottom-color: rgba(255, 255, 255, 0.1);
 }
 
 .dark-theme .app-title {
@@ -343,16 +390,27 @@ button:hover {
 }
 
 .dark-theme .settings-section {
-    background-color: #252525;
+    background-color: #292a2d;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+.dark-theme .settings-section:hover {
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
 }
 
 .dark-theme input, 
 .dark-theme select, 
 .dark-theme textarea {
-    background-color: #333;
-    border-color: #444;
-    color: #e0e0e0;
+    background-color: #202124;
+    border-color: #5f6368;
+    color: #e8eaed;
+}
+
+.dark-theme input:focus, 
+.dark-theme select:focus, 
+.dark-theme textarea:focus {
+    border-color: #8ab4f8;
+    box-shadow: 0 0 0 2px rgba(138, 180, 248, 0.1);
 }
 
 .dark-theme button {
@@ -381,21 +439,31 @@ button:hover {
     border-color: #444;
 }
 
-.dark-theme .prompt-item {
-    border-bottom-color: #444;
+.dark-theme .prompt-item:hover {
+    background-color: #303134;
+}
+
+.dark-theme .prompt-item-name {
+    color: #e8eaed;
 }
 
 .dark-theme .prompt-item-text {
-    color: #aaa;
+    color: #9aa0a6;
 }
 
 .dark-theme .prompt-item-status {
-    background-color: rgba(66, 133, 244, 0.2);
+    background-color: rgba(138, 180, 248, 0.2);
+    color: #8ab4f8;
 }
 
 .dark-theme .edit-btn:hover, 
 .dark-theme .delete-btn:hover {
-    background-color: #444;
+    background-color: #303134;
+}
+
+.dark-theme .edit-btn:hover svg path, 
+.dark-theme .delete-btn:hover svg path {
+    stroke: #e8eaed;
 }
 
 .dark-theme .add-prompt-btn {
