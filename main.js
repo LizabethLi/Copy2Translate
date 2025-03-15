@@ -176,6 +176,55 @@ app.whenReady().then(() => {
     showNotification("设置成功", "翻译提示词已更新");
   });
 
+  // 添加 IPC 处理程序来保存提示词列表
+  ipcMain.on("savePrompts", (event, prompts) => {
+    console.log("主进程保存提示词列表:", prompts);
+    settings.setSync("prompts", prompts);
+  });
+
+  // 添加 IPC 处理程序来获取提示词列表
+  ipcMain.handle("getPrompts", () => {
+    const savedPrompts = settings.getSync("prompts");
+    console.log("主进程获取提示词列表:", savedPrompts);
+    
+    // 如果没有保存的提示词，返回默认的三条基本提示词
+    if (!savedPrompts || savedPrompts.length === 0) {
+      const defaultPrompts = [
+        {
+          id: "default",
+          name: "默认英文翻译",
+          text: "Please translate this Chinese text to English, only return the translation:",
+          isActive: true
+        },
+        {
+          id: "formal",
+          name: "正式商务",
+          text: "Please translate this Chinese text to formal Business English. Use professional vocabulary, maintain a respectful tone, and ensure the language is appropriate for corporate communications or official documents,only return the translation:",
+          isActive: false
+        },
+        {
+          id: "casual",
+          name: "日常口语",
+          text: "Please translate this Chinese text to casual, conversational English. Use everyday expressions, contractions, and a friendly tone that would be appropriate for informal conversations with friends,only return the translation:",
+          isActive: false
+        }
+      ];
+      
+      // 保存默认提示词到设置中
+      settings.setSync("prompts", defaultPrompts);
+      return defaultPrompts;
+    }
+    
+    return savedPrompts;
+  });
+
+  // 添加 IPC 处理程序来清除提示词列表
+  ipcMain.handle("clearPrompts", () => {
+    console.log("清除主进程中的提示词列表");
+    settings.unsetSync("prompts");
+    return true;
+  });
+
   // 设置 CSP
   mainWindow.webContents.session.webRequest.onHeadersReceived((details, callback) => {
     callback({

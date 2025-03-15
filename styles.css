@@ -201,7 +201,9 @@ button {
 
 .prompts-list {
     border: 1px solid #eee;
-    border-radius: 4px;
+    border-radius: 8px;
+    max-height: 500px;
+    overflow-y: auto;
 }
 
 .prompt-item {
@@ -226,6 +228,10 @@ button {
 .prompt-item-text {
     color: #5f6368;
     font-size: 14px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
 }
 
 .prompt-item-status {
@@ -736,4 +742,39 @@ button {
 
 .hidden {
     display: none !important;
+}
+
+.prompt-buttons {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.add-prompt-btn, .reset-prompts-btn {
+    background-color: white;
+    border: 1px solid #ddd;
+    padding: 8px 15px;
+    border-radius: 6px;
+    font-size: 14px;
+    transition: all 0.2s ease;
+}
+
+.add-prompt-btn:hover, .reset-prompts-btn:hover {
+    background-color: #f1f3f4;
+    border-color: #c6c6c6;
+}
+
+.reset-prompts-btn {
+    color: #5f6368;
+}
+
+.dark-theme .add-prompt-btn, .dark-theme .reset-prompts-btn {
+    background-color: #252525;
+    border-color: #444;
+    color: #e0e0e0;
+}
+
+.dark-theme .add-prompt-btn:hover, .dark-theme .reset-prompts-btn:hover {
+    background-color: #303134;
 }

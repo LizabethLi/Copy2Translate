@@ -5,10 +5,47 @@ let prompts = [
   {
     id: "default",
     name: "默认英文翻译",
-    text: "Please translate this Chinese text to English, maintaining its professional tone:",
+    text: "Please translate this Chinese text to English, only return the translation:",
     isActive: true
+  },
+  {
+    id: "formal",
+    name: "正式商务",
+    text: "Please translate this Chinese text to formal Business English. Use professional vocabulary, maintain a respectful tone, and ensure the language is appropriate for corporate communications or official documents,only return the translation:",
+    isActive: false
+  },
+  {
+    id: "casual",
+    name: "日常口语",
+    text: "Please translate this Chinese text to casual, conversational English. Use everyday expressions, contractions, and a friendly tone that would be appropriate for informal conversations with friends,only return the translation:",
+    isActive: false
   }
 ];
+
+// 清除 localStorage 中的提示词数据
+function clearLocalStoragePrompts() {
+  console.log("清除提示词数据");
+  
+  // 清除 localStorage 中的提示词数据
+  localStorage.removeItem('prompts');
+  console.log("localStorage 中的提示词数据已清除");
+  
+  // 清除主进程中的提示词数据
+  ipcRenderer.invoke('clearPrompts')
+    .then(() => {
+      console.log("主进程中的提示词数据已清除");
+      alert("提示词数据已清除，请重新启动应用程序测试");
+      
+      // 重新加载页面以应用更改
+      setTimeout(() => {
+        location.reload();
+      }, 1000);
+    })
+    .catch(error => {
+      console.error("清除主进程中的提示词数据时出错:", error);
+      alert("清除提示词数据时出错，请手动重新启动应用程序");
+    });
+}
 
 // 标记当前是否处于编辑模式
 let isEditMode = false;
@@ -18,6 +55,10 @@ let editingPromptId = null;
 let currentProvider = 'openRouter';
 
 document.addEventListener("DOMContentLoaded", () => {
+  // 检查 localStorage 状态
+  console.log("页面加载时的 localStorage 状态:");
+  console.log("prompts:", localStorage.getItem('prompts'));
+  
   // 初始化提示词列表
   loadPrompts();
   
@@ -26,6 +67,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // 显示当前 prompt
   fetchPrompt();
+
+  // 在页面关闭前保存提示词列表
+  window.addEventListener('beforeunload', () => {
+    console.log("页面关闭前保存提示词列表");
+    savePrompts();
+  });
 
   // 添加输入框事件监听
   document.getElementById("newShortcut").addEventListener("keydown", (e) => {
@@ -57,9 +104,16 @@ document.addEventListener("DOMContentLoaded", () => {
   document.getElementById("updateShortcutBtn").addEventListener("click", updateShortcut);
   document.getElementById("saveApiKeyBtn").addEventListener("click", saveApiKey);
   document.getElementById("addPromptBtn").addEventListener("click", showAddPromptModal);
+  document.getElementById("resetPromptsBtn").addEventListener("click", resetPrompts);
   document.getElementById("savePromptBtn").addEventListener("click", handleSavePrompt);
   document.getElementById("cancelAddPromptBtn").addEventListener("click", hideAddPromptModal);
   document.getElementById("translateBtn").addEventListener("click", simulateTranslation);
+  
+  // 添加清除 localStorage 按钮事件监听（如果存在这个按钮）
+  const clearLocalStorageBtn = document.getElementById("clearLocalStorageBtn");
+  if (clearLocalStorageBtn) {
+    clearLocalStorageBtn.addEventListener("click", clearLocalStoragePrompts);
+  }
   
   // 顶部标题栏按钮事件监听
   document.getElementById("apiKeyBtn").addEventListener("click", showApiKeyModal);
@@ -331,17 +385,93 @@ function cancelApiKeySetting() {
 
 // 加载提示词列表
 function loadPrompts() {
-  // 从本地存储加载提示词列表，如果没有则使用默认值
-  const savedPrompts = localStorage.getItem('prompts');
-  if (savedPrompts) {
-    prompts = JSON.parse(savedPrompts);
-  }
-  
-  // 更新提示词下拉列表
-  updatePromptSelect();
-  
-  // 更新提示词列表显示
-  renderPromptsList();
+  // 尝试从主进程获取提示词列表
+  ipcRenderer.invoke('getPrompts')
+    .then(savedPrompts => {
+      console.log("从主进程获取提示词:", savedPrompts);
+      
+      if (savedPrompts && savedPrompts.length > 0) {
+        // 如果主进程中有提示词，使用它们
+        prompts = savedPrompts;
+        console.log("成功从主进程获取提示词:", prompts);
+      } else {
+        // 尝试从本地存储加载提示词列表
+        const localPrompts = localStorage.getItem('prompts');
+        console.log("从本地存储加载提示词:", localPrompts);
+        
+        if (localPrompts) {
+          try {
+            // 如果本地存储中有提示词，使用它们
+            prompts = JSON.parse(localPrompts);
+            console.log("成功解析本地存储中的提示词:", prompts);
+            
+            // 同步到主进程
+            ipcRenderer.send('savePrompts', prompts);
+          } catch (error) {
+            console.error("解析本地存储中的提示词时出错:", error);
+            // 如果解析出错，使用默认提示词
+            localStorage.setItem('prompts', JSON.stringify(prompts));
+            // 同步到主进程
+            ipcRenderer.send('savePrompts', prompts);
+          }
+        } else {
+          console.log("本地存储中没有提示词，使用默认提示词");
+          // 如果本地存储中没有提示词，使用默认提示词并保存到本地存储
+          localStorage.setItem('prompts', JSON.stringify(prompts));
+          // 同步到主进程
+          ipcRenderer.send('savePrompts', prompts);
+        }
+      }
+      
+      // 确保至少有一个提示词是活跃的
+      const hasActivePrompt = prompts.some(p => p.isActive);
+      if (!hasActivePrompt && prompts.length > 0) {
+        prompts[0].isActive = true;
+        console.log("没有活跃的提示词，将第一个提示词设为活跃:", prompts[0]);
+      }
+      
+      // 更新提示词下拉列表
+      updatePromptSelect();
+      
+      // 更新提示词列表显示
+      renderPromptsList();
+    })
+    .catch(error => {
+      console.error("从主进程获取提示词时出错:", error);
+      
+      // 尝试从本地存储加载提示词列表
+      const localPrompts = localStorage.getItem('prompts');
+      console.log("从本地存储加载提示词:", localPrompts);
+      
+      if (localPrompts) {
+        try {
+          // 如果本地存储中有提示词，使用它们
+          prompts = JSON.parse(localPrompts);
+          console.log("成功解析本地存储中的提示词:", prompts);
+        } catch (error) {
+          console.error("解析本地存储中的提示词时出错:", error);
+          // 如果解析出错，使用默认提示词
+          localStorage.setItem('prompts', JSON.stringify(prompts));
+        }
+      } else {
+        console.log("本地存储中没有提示词，使用默认提示词");
+        // 如果本地存储中没有提示词，使用默认提示词并保存到本地存储
+        localStorage.setItem('prompts', JSON.stringify(prompts));
+      }
+      
+      // 确保至少有一个提示词是活跃的
+      const hasActivePrompt = prompts.some(p => p.isActive);
+      if (!hasActivePrompt && prompts.length > 0) {
+        prompts[0].isActive = true;
+        console.log("没有活跃的提示词，将第一个提示词设为活跃:", prompts[0]);
+      }
+      
+      // 更新提示词下拉列表
+      updatePromptSelect();
+      
+      // 更新提示词列表显示
+      renderPromptsList();
+    });
 }
 
 // 更新提示词下拉列表
@@ -365,7 +495,11 @@ function renderPromptsList() {
   const promptsList = document.getElementById("promptsList");
   promptsList.innerHTML = '';
   
+  console.log("渲染提示词列表，共", prompts.length, "个提示词");
+  
   prompts.forEach(prompt => {
+    console.log("渲染提示词:", prompt.id, prompt.name, prompt.isActive ? "(活跃)" : "");
+    
     const promptItem = document.createElement('div');
     promptItem.className = 'prompt-item';
     
@@ -437,6 +571,7 @@ function handleSavePrompt() {
   }
   
   if (isEditMode && editingPromptId) {
+    console.log("更新现有提示词:", editingPromptId);
     // 更新现有提示词
     const prompt = prompts.find(p => p.id === editingPromptId);
     if (prompt) {
@@ -451,6 +586,7 @@ function handleSavePrompt() {
       }
     }
   } else {
+    console.log("添加新提示词:", name);
     // 添加新提示词
     const newPrompt = {
       id: Date.now().toString(),
@@ -495,16 +631,48 @@ function deletePrompt(id) {
   }
   
   if (confirm(`确定要删除提示词"${prompt.name}"吗？`)) {
+    console.log("删除提示词:", id, prompt.name);
     prompts = prompts.filter(p => p.id !== id);
+    console.log("删除后的提示词列表:", prompts);
     savePrompts();
   }
 }
 
-// 保存提示词列表到本地存储
+// 保存提示词列表到本地存储和主进程
 function savePrompts() {
+  console.log("保存提示词列表:", prompts);
+  
+  // 保存到本地存储
   localStorage.setItem('prompts', JSON.stringify(prompts));
+  console.log("保存到本地存储完成");
+  
+  // 保存到主进程
+  ipcRenderer.send('savePrompts', prompts);
+  console.log("保存到主进程完成");
+  
+  // 更新界面
   updatePromptSelect();
   renderPromptsList();
+}
+
+// 更新提示词UI（在修改prompts后调用此函数立即更新界面）
+function updatePromptsUI() {
+  console.log("更新提示词UI");
+  
+  // 更新提示词下拉列表
+  updatePromptSelect();
+  
+  // 更新提示词列表显示
+  renderPromptsList();
+  
+  // 更新当前活跃提示词的输入框
+  const activePrompt = prompts.find(p => p.isActive);
+  if (activePrompt) {
+    document.getElementById("promptInput").value = activePrompt.text;
+  }
+  
+  // 保存更改
+  savePrompts();
 }
 
 // 处理提示词选择变更
@@ -553,5 +721,44 @@ function toggleTheme() {
     themeBtn.querySelector(".btn-icon").textContent = "☀️";
   } else {
     themeBtn.querySelector(".btn-icon").textContent = "🌙";
+  }
+}
+
+// 重置提示词列表为预设值
+function resetPrompts() {
+  if (confirm("确定要重置提示词列表吗？这将删除所有自定义提示词。")) {
+    // 重置为预设的提示词
+    prompts = [
+      {
+        id: "default",
+        name: "默认英文翻译",
+        text: "Please translate this Chinese text to English, only return the translation:",
+        isActive: true
+      },
+      {
+        id: "formal",
+        name: "正式商务",
+        text: "Please translate this Chinese text to formal Business English. Use professional vocabulary, maintain a respectful tone, and ensure the language is appropriate for corporate communications or official documents,only return the translation:",
+        isActive: false
+      },
+      {
+        id: "casual",
+        name: "日常口语",
+        text: "Please translate this Chinese text to casual, conversational English. Use everyday expressions, contractions, and a friendly tone that would be appropriate for informal conversations with friends,only return the translation:",
+        isActive: false
+      }
+    ];
+    
+    // 保存到本地存储
+    localStorage.setItem('prompts', JSON.stringify(prompts));
+    
+    // 保存到主进程
+    ipcRenderer.send('savePrompts', prompts);
+    
+    // 更新界面
+    updatePromptSelect();
+    renderPromptsList();
+    
+    alert("提示词列表已重置为预设值。");
   }
 }
