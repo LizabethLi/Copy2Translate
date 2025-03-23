@@ -10,7 +10,8 @@ contextBridge.exposeInMainWorld('electron', {
       'shortcutUpdated',
       'shortcutUpdateFailed',
       'apiKeySaved',
-      'apiKeyError'
+      'apiKeyError',
+      'showTranslationComplete'
     ];
     if (validChannels.includes(channel)) {
       // 删除 IPC 事件监听器以避免内存泄漏

@@ -18,28 +18,74 @@ let userPrompt = settings.getSync("prompt") || "Translate the following Chinese 
 // 修改通知函数，添加更多选项
 function showNotification(title, body) {
   if (Notification.isSupported()) {
-    const notification = new Notification({
-      title,
-      body,
-      silent: false, // 不要默认的通知声音，我们使用自定义声音
-      icon: process.platform === 'darwin' ? undefined : path.join(__dirname, 'icon.png'), // 在Windows上显示图标
-      timeoutType: 'default'
-    });
-    
-    notification.show();
-    
-    // 如果是翻译完成的通知，让主窗口闪烁提醒用户
-    if (title === "翻译完成" && mainWindow) {
+    try {
+      const notification = new Notification({
+        title,
+        body,
+        silent: false,
+        subtitle: process.platform === 'darwin' ? 'Tap2Translate' : undefined, // macOS特有属性
+        icon: process.platform === 'darwin' ? undefined : path.join(__dirname, 'icon.png'),
+        timeoutType: 'default'
+      });
+      
+      // 确保在macOS上应用已注册可发送通知
       if (process.platform === 'darwin') {
-        // macOS上使用dock弹跳
-        app.dock.bounce('critical');
-      } else if (process.platform === 'win32') {
-        // Windows上闪烁任务栏图标
-        mainWindow.flashFrame(true);
-        setTimeout(() => {
-          mainWindow.flashFrame(false);
-        }, 2000);
+        // 设置为告警型通知，确保显示横幅
+        notification.urgency = 'critical';
       }
+      
+      notification.show();
+      
+      // 为macOS添加回调以确认通知已显示
+      if (process.platform === 'darwin') {
+        notification.on('show', () => {
+          console.log('通知已显示');
+        });
+        
+        notification.on('click', () => {
+          if (mainWindow) {
+            if (mainWindow.isMinimized()) mainWindow.restore();
+            mainWindow.focus();
+          }
+        });
+      }
+      
+      // 如果是翻译完成的通知，让主窗口闪烁提醒用户
+      if (title === "翻译完成" && mainWindow) {
+        if (process.platform === 'darwin') {
+          // macOS上使用dock弹跳作为辅助提醒
+          try {
+            if (app.dock && typeof app.dock.bounce === 'function') {
+              const bounceId = app.dock.bounce('informational');
+              // 3秒后停止弹跳
+              setTimeout(() => {
+                if (bounceId !== undefined) app.dock.cancelBounce(bounceId);
+              }, 3000);
+            }
+          } catch (error) {
+            console.error('Dock弹跳失败:', error);
+            // 忽略失败，继续执行
+          }
+        } else if (process.platform === 'win32') {
+          // Windows上闪烁任务栏图标
+          mainWindow.flashFrame(true);
+          setTimeout(() => {
+            mainWindow.flashFrame(false);
+          }, 2000);
+        }
+      }
+    } catch (error) {
+      console.error('显示通知失败:', error);
+      // 如果通知失败，尝试通过窗口提醒用户
+      if (mainWindow && mainWindow.webContents) {
+        mainWindow.webContents.send('showTranslationComplete', { title, body });
+      }
+    }
+  } else {
+    console.warn('系统不支持通知，将使用窗口内提醒');
+    // 通过窗口提醒用户
+    if (mainWindow && mainWindow.webContents) {
+      mainWindow.webContents.send('showTranslationComplete', { title, body });
     }
   }
 }
@@ -145,9 +191,50 @@ async function translateText(text) {
 app.whenReady().then(() => {
   // 请求通知权限（仅在 macOS 上需要）
   if (process.platform === 'darwin') {
-    app.setAppUserModelId(process.execPath);
+    // macOS 不需要设置 AppUserModelId，这仅在 Windows 上才需要
+    // 设置应用名称，这在 macOS 上对于通知很重要
+    app.name = 'Tap2Translate';
+    
+    // 如果使用Electron v9+，可以检查通知权限
+    if (Notification.isSupported()) {
+      // 检查权限
+      Notification.requestPermission().then(permission => {
+        console.log('通知权限状态:', permission);
+      });
+    }
+  } else if (process.platform === 'win32') {
+    // 在 Windows 上设置应用 ID
+    app.setAppUserModelId('com.tap2translate.app');
   }
 
+  // 创建主窗口
+  createWindow();
+  
+  // 注册快捷键
+  const registeredShortcut = registerShortcut(userShortcut);
+  console.log("已注册快捷键:", registeredShortcut ? "成功" : "失败");
+});
+
+// 监听应用退出，释放快捷键
+app.on("will-quit", () => {
+  globalShortcut.unregisterAll();
+});
+
+// 在应用准备就绪时创建窗口
+app.on('window-all-closed', () => {
+  if (process.platform !== 'darwin') {
+    app.quit();
+  }
+});
+
+app.on('activate', () => {
+  if (BrowserWindow.getAllWindows().length === 0) {
+    createWindow();
+  }
+});
+
+// 定义创建窗口的函数
+function createWindow() {
   // 创建窗口
   mainWindow = new BrowserWindow({
     width: 400,
@@ -160,6 +247,9 @@ app.whenReady().then(() => {
     },
   });
 
+  // 加载HTML文件
+  mainWindow.loadFile('index.html');
+  
   // 设置 CSP 头
   mainWindow.webContents.session.webRequest.onHeadersReceived((details, callback) => {
     callback({
@@ -169,7 +259,7 @@ app.whenReady().then(() => {
       }
     });
   });
-
+  
   // 检查是否有通知权限
   if (Notification.isSupported()) {
     console.log('通知功能支持');
@@ -177,20 +267,21 @@ app.whenReady().then(() => {
     console.log('通知功能不支持');
   }
 
-  mainWindow.loadFile("index.html");
+  // 监听提示词更新
+  setupIPCListeners();
 
-  // 只在开发环境下打开开发者工具
-  if (process.env.NODE_ENV === 'development') {
+  // 在开发环境中打开开发者工具
+  if (process.env.NODE_ENV === "development") {
     mainWindow.webContents.openDevTools();
   }
+}
 
+// 设置IPC监听器
+function setupIPCListeners() {
   // 检查是否有 API key
   if (!apiKey) {
     mainWindow.webContents.send("showApiKeyPrompt");
   }
-
-  // 注册全局快捷键
-  registerShortcut(userShortcut);
 
   // 监听快捷键更新
   ipcMain.on("updateShortcut", (event, newShortcut) => {
@@ -323,22 +414,4 @@ app.whenReady().then(() => {
     settings.unsetSync("prompts");
     return true;
   });
-});
-
-// 监听应用退出，释放快捷键
-app.on("will-quit", () => {
-  globalShortcut.unregisterAll();
-});
-
-// 在应用准备就绪时创建窗口
-app.on('window-all-closed', () => {
-  if (process.platform !== 'darwin') {
-    app.quit();
-  }
-});
-
-app.on('activate', () => {
-  if (BrowserWindow.getAllWindows().length === 0) {
-    createWindow();
-  }
-});
+}

@@ -111,6 +111,12 @@ document.addEventListener("DOMContentLoaded", () => {
     }, 2000);
   });
 
+  // 添加应用内通知处理
+  window.electron.receive("showTranslationComplete", (data) => {
+    // 创建一个应用内通知元素
+    showAppNotification(data.title, data.body);
+  });
+
   // 添加按钮事件监听器
   document.getElementById("updateShortcutBtn").addEventListener("click", updateShortcut);
   document.getElementById("saveApiKeyBtn").addEventListener("click", saveApiKey);
@@ -648,7 +654,7 @@ function editPrompt(id) {
   editingPromptId = id;
   
   // 显示弹窗并填充数据
-  document.getElementById("addPromptModal").style.display = "block";
+  document.getElementById("addPromptModal").classList.remove('hidden');
   document.getElementById("newPromptName").value = prompt.name;
   document.getElementById("newPromptText").value = prompt.text;
 }
@@ -781,4 +787,67 @@ function resetPrompts() {
   renderPromptsList();
   
   alert("提示词列表已重置为预设值。");
+}
+
+// 应用内通知函数
+function showAppNotification(title, message) {
+  // 检查是否存在通知容器，如果不存在则创建
+  let notificationContainer = document.getElementById('app-notification-container');
+  if (!notificationContainer) {
+    notificationContainer = document.createElement('div');
+    notificationContainer.id = 'app-notification-container';
+    notificationContainer.style.position = 'fixed';
+    notificationContainer.style.top = '20px';
+    notificationContainer.style.right = '20px';
+    notificationContainer.style.zIndex = '9999';
+    document.body.appendChild(notificationContainer);
+  }
+  
+  // 创建通知元素
+  const notification = document.createElement('div');
+  notification.className = 'app-notification';
+  notification.style.backgroundColor = 'rgba(60, 60, 60, 0.9)';
+  notification.style.color = 'white';
+  notification.style.padding = '12px 16px';
+  notification.style.marginBottom = '10px';
+  notification.style.borderRadius = '8px';
+  notification.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.15)';
+  notification.style.width = '300px';
+  notification.style.maxWidth = '100%';
+  notification.style.transition = 'all 0.3s ease';
+  notification.style.opacity = '0';
+  notification.style.transform = 'translateX(20px)';
+  
+  // 创建标题
+  const titleElement = document.createElement('div');
+  titleElement.textContent = title;
+  titleElement.style.fontWeight = 'bold';
+  titleElement.style.marginBottom = '5px';
+  notification.appendChild(titleElement);
+  
+  // 创建消息
+  const messageElement = document.createElement('div');
+  messageElement.textContent = message;
+  messageElement.style.fontSize = '14px';
+  notification.appendChild(messageElement);
+  
+  // 添加到容器
+  notificationContainer.appendChild(notification);
+  
+  // 触发过渡动画
+  setTimeout(() => {
+    notification.style.opacity = '1';
+    notification.style.transform = 'translateX(0)';
+  }, 10);
+  
+  // 自动消失
+  setTimeout(() => {
+    notification.style.opacity = '0';
+    notification.style.transform = 'translateX(20px)';
+    
+    // 移除元素
+    setTimeout(() => {
+      notificationContainer.removeChild(notification);
+    }, 300);
+  }, 3000);
 }
