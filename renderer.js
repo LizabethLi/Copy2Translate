@@ -1,58 +1,50 @@
-const { ipcRenderer } = require("electron");
+// 移除 require 语句，使用 window.electron API
+// const { ipcRenderer } = require("electron");
 
-// 存储提示词列表
-let prompts = [
+// 常量定义
+const AUDIO_SETTINGS = {
+  HIGH_E: 1318.51,
+  LOW_E: 659.25,
+  DURATION: 0.5,
+  INITIAL_GAIN: 0.1
+};
+
+const PROVIDERS = {
+  OPEN_ROUTER: 'openRouter',
+  DEEP_SEEK: 'deepSeek'
+};
+
+// 默认提示词配置
+const DEFAULT_PROMPTS = [
   {
     id: "default",
     name: "默认英文翻译",
-    text: "Please translate this Chinese text to English, only return the translation:",
+    text: "Please translate the following text to English, please make sure only return the translation:",
     isActive: true
   },
   {
     id: "formal",
     name: "正式商务",
-    text: "Please translate this Chinese text to formal Business English. Use professional vocabulary, maintain a respectful tone, and ensure the language is appropriate for corporate communications or official documents,only return the translation:",
+    text: "Please translate the following text to formal Business English. Use professional vocabulary, maintain a respectful tone, and ensure the language is appropriate for corporate communications or official documents,please make sure only return the translation:",
     isActive: false
   },
   {
     id: "casual",
     name: "日常口语",
-    text: "Please translate this Chinese text to casual, conversational English. Use everyday expressions, contractions, and a friendly tone that would be appropriate for informal conversations with friends,only return the translation:",
+    text: "Please translate the following text to casual, conversational English. Use everyday expressions, contractions, and a friendly tone that would be appropriate for informal conversations with friends,please make sure only return the translation:",
     isActive: false
   }
 ];
 
-// 清除 localStorage 中的提示词数据
-function clearLocalStoragePrompts() {
-  console.log("清除提示词数据");
-  
-  // 清除 localStorage 中的提示词数据
-  localStorage.removeItem('prompts');
-  console.log("localStorage 中的提示词数据已清除");
-  
-  // 清除主进程中的提示词数据
-  ipcRenderer.invoke('clearPrompts')
-    .then(() => {
-      console.log("主进程中的提示词数据已清除");
-      alert("提示词数据已清除，请重新启动应用程序测试");
-      
-      // 重新加载页面以应用更改
-      setTimeout(() => {
-        location.reload();
-      }, 1000);
-    })
-    .catch(error => {
-      console.error("清除主进程中的提示词数据时出错:", error);
-      alert("清除提示词数据时出错，请手动重新启动应用程序");
-    });
-}
+// 初始化提示词列表
+let prompts = [...DEFAULT_PROMPTS];
 
 // 标记当前是否处于编辑模式
 let isEditMode = false;
 let editingPromptId = null;
 
 // 当前选中的提供商
-let currentProvider = 'openRouter';
+let currentProvider = PROVIDERS.OPEN_ROUTER;
 
 document.addEventListener("DOMContentLoaded", () => {
   // 检查 localStorage 状态
@@ -83,21 +75,40 @@ document.addEventListener("DOMContentLoaded", () => {
     if (e.altKey) modifiers.push("Alt");
     if (e.metaKey) modifiers.push("Command");
 
+    // 只接受ASCII字符
     const key = e.key.toUpperCase();
     if (key !== "CONTROL" && key !== "SHIFT" && key !== "ALT" && key !== "META") {
-      const shortcut = [...modifiers, key].join("+");
-      document.getElementById("newShortcut").value = shortcut;
+      // 检查是否为ASCII字符
+      if (/^[\x00-\x7F]$/.test(e.key)) {
+        const shortcut = [...modifiers, key].join("+");
+        document.getElementById("newShortcut").value = shortcut;
+      } else {
+        console.warn(`忽略非ASCII字符: ${e.key}`);
+      }
     }
   });
 
   // 监听显示 API key 输入提示
-  ipcRenderer.on("showApiKeyPrompt", () => {
+  window.electron.receive("showApiKeyPrompt", () => {
     document.getElementById("apiKeyModal").style.display = "block";
   });
 
   // 翻译结果接收
-  ipcRenderer.on("translatedText", (event, text) => {
-    document.getElementById("translatedText").value = text;
+  window.electron.receive("translatedText", (text) => {
+    const translatedTextArea = document.getElementById("translatedText");
+    translatedTextArea.value = text;
+    
+    // 添加动画效果以提醒用户翻译已完成
+    translatedTextArea.classList.add("translation-complete");
+    
+    // 聚焦到翻译结果区域并选中所有文本
+    translatedTextArea.focus();
+    translatedTextArea.select();
+    
+    // 移除动画类，为下次翻译做准备
+    setTimeout(() => {
+      translatedTextArea.classList.remove("translation-complete");
+    }, 2000);
   });
 
   // 添加按钮事件监听器
@@ -117,7 +128,6 @@ document.addEventListener("DOMContentLoaded", () => {
   
   // 顶部标题栏按钮事件监听
   document.getElementById("apiKeyBtn").addEventListener("click", showApiKeyModal);
-  document.getElementById("themeToggleBtn").addEventListener("click", toggleTheme);
   
   // API Key弹窗事件监听
   document.getElementById("saveApiKeyBtn").addEventListener("click", saveApiKey);
@@ -141,7 +151,7 @@ document.addEventListener("DOMContentLoaded", () => {
 // 读取并显示当前快捷键
 async function fetchShortcut() {
   try {
-    const shortcut = await ipcRenderer.invoke('getShortcut');
+    const shortcut = await window.electron.invoke('getShortcut');
     console.log("Current shortcut:", shortcut);
     document.getElementById("currentShortcut").innerText = shortcut;
   } catch (error) {
@@ -152,7 +162,7 @@ async function fetchShortcut() {
 // 读取并显示当前 prompt
 async function fetchPrompt() {
   try {
-    const prompt = await ipcRenderer.invoke('getPrompt');
+    const prompt = await window.electron.invoke('getPrompt');
     document.getElementById("promptInput").value = prompt;
   } catch (error) {
     console.error('Error fetching prompt:', error);
@@ -163,15 +173,27 @@ async function fetchPrompt() {
 function updateShortcut() {
   const newShortcut = document.getElementById("newShortcut").value;
   if (newShortcut) {
-    ipcRenderer.send("updateShortcut", newShortcut);
-    document.getElementById("currentShortcut").innerText = newShortcut;
-    alert(`快捷键已更新为：${newShortcut}`);
+    // 先设置监听器
+    window.electron.receive("shortcutUpdated", (updatedShortcut) => {
+      document.getElementById("currentShortcut").innerText = updatedShortcut;
+      alert(`快捷键已更新为：${updatedShortcut}`);
+    });
+    
+    window.electron.receive("shortcutUpdateFailed", (reason) => {
+      alert(`快捷键更新失败：${reason}`);
+      // 重新获取当前快捷键
+      fetchShortcut();
+    });
+    
+    // 然后发送更新请求
+    window.electron.send("updateShortcut", newShortcut);
   }
 }
 
 // 显示API Key设置弹窗
 function showApiKeyModal() {
-  document.getElementById("apiKeyModal").style.display = "block";
+  const modal = document.getElementById("apiKeyModal");
+  modal.classList.remove('hidden');
   
   // 加载当前API Key和模型信息
   loadApiKeySettings();
@@ -181,27 +203,27 @@ function showApiKeyModal() {
 async function loadApiKeySettings() {
   try {
     let openRouterApiKey = '';
-    let openRouterModel = 'openai/gpt-4o';
+    let openRouterModel = '';
     let deepSeekApiKey = '';
-    let deepSeekModel = 'deepseek-chat';
+    let deepSeekModel = '';
     
     // 尝试从主进程获取设置
     try {
       // 尝试从主进程获取OpenRouter设置
-      openRouterApiKey = await ipcRenderer.invoke('getApiKey', 'openRouter') || '';
-      openRouterModel = await ipcRenderer.invoke('getModel', 'openRouter') || 'openai/gpt-4o';
+      openRouterApiKey = await window.electron.invoke('getApiKey', 'openRouter') || '';
+      openRouterModel = await window.electron.invoke('getModel', 'openRouter') || '';
       
       // 尝试从主进程获取DeepSeek设置
-      deepSeekApiKey = await ipcRenderer.invoke('getApiKey', 'deepSeek') || '';
-      deepSeekModel = await ipcRenderer.invoke('getModel', 'deepSeek') || 'deepseek-chat';
+      deepSeekApiKey = await window.electron.invoke('getApiKey', 'deepSeek') || '';
+      deepSeekModel = await window.electron.invoke('getModel', 'deepSeek') || '';
     } catch (ipcError) {
       console.warn('无法从主进程获取API设置，将使用本地存储:', ipcError);
       
       // 从本地存储获取设置作为备选方案
       openRouterApiKey = localStorage.getItem('openRouterApiKey') || '';
-      openRouterModel = localStorage.getItem('openRouterModel') || 'openai/gpt-4o';
+      openRouterModel = localStorage.getItem('openRouterModel') || '';
       deepSeekApiKey = localStorage.getItem('deepSeekApiKey') || '';
-      deepSeekModel = localStorage.getItem('deepSeekModel') || 'deepseek-chat';
+      deepSeekModel = localStorage.getItem('deepSeekModel') || '';
     }
     
     // 更新OpenRouter显示
@@ -231,11 +253,17 @@ function updateProviderDisplay(provider, apiKey, model) {
       currentApiKeyInput.placeholder = '尚未设置 API Key';
     }
     
-    currentModelInput.value = model;
+    if (model) {
+      currentModelInput.value = model;
+      currentModelInput.placeholder = '';
+    } else {
+      currentModelInput.value = '';
+      currentModelInput.placeholder = '尚未设置模型';
+    }
     
-    // 预填充更新表单
+    // 清空新输入框，只保留 placeholder
     document.getElementById("newApiKey").value = '';
-    document.getElementById("newModel").value = model;
+    document.getElementById("newModel").value = '';
   } else if (provider === 'deepSeek') {
     const currentApiKeyInput = document.getElementById("currentDeepSeekApiKey");
     const currentModelInput = document.getElementById("currentDeepSeekModel");
@@ -248,11 +276,17 @@ function updateProviderDisplay(provider, apiKey, model) {
       currentApiKeyInput.placeholder = '尚未设置 API Key';
     }
     
-    currentModelInput.value = model;
+    if (model) {
+      currentModelInput.value = model;
+      currentModelInput.placeholder = '';
+    } else {
+      currentModelInput.value = '';
+      currentModelInput.placeholder = '尚未设置模型';
+    }
     
-    // 预填充更新表单
+    // 清空新输入框，只保留 placeholder
     document.getElementById("newDeepSeekApiKey").value = '';
-    document.getElementById("newDeepSeekModel").value = model;
+    document.getElementById("newDeepSeekModel").value = '';
   }
   
   // 更新提供商状态
@@ -286,7 +320,7 @@ function saveApiKey() {
   
   if (currentProvider === 'openRouter') {
     apiKey = document.getElementById("newApiKey").value;
-    model = document.getElementById("newModel").value || 'openai/gpt-4o';
+    model = document.getElementById("newModel").value;
     
     // 如果没有输入新的API Key，检查是否有现有的
     if (!apiKey) {
@@ -294,7 +328,7 @@ function saveApiKey() {
     }
   } else if (currentProvider === 'deepSeek') {
     apiKey = document.getElementById("newDeepSeekApiKey").value;
-    model = document.getElementById("newDeepSeekModel").value || 'deepseek-chat';
+    model = document.getElementById("newDeepSeekModel").value;
     
     // 如果没有输入新的API Key，检查是否有现有的
     if (!apiKey) {
@@ -303,21 +337,23 @@ function saveApiKey() {
   }
   
   if (apiKey) {
-    // 尝试发送到主进程保存
-    try {
-      ipcRenderer.send("setApiKey", apiKey, currentProvider);
-      ipcRenderer.send("setModel", model, currentProvider);
-    } catch (error) {
-      console.warn('无法通过IPC保存设置，将使用本地存储:', error);
+    // 发送到主进程保存
+    window.electron.send("setApiKey", apiKey, currentProvider);
+    if (model) {  // 只有当用户实际输入了模型时才保存
+      window.electron.send("setModel", model, currentProvider);
     }
     
     // 同时保存到本地存储作为备选方案
     if (currentProvider === 'openRouter') {
       localStorage.setItem('openRouterApiKey', apiKey);
-      localStorage.setItem('openRouterModel', model);
+      if (model) {
+        localStorage.setItem('openRouterModel', model);
+      }
     } else if (currentProvider === 'deepSeek') {
       localStorage.setItem('deepSeekApiKey', apiKey);
-      localStorage.setItem('deepSeekModel', model);
+      if (model) {
+        localStorage.setItem('deepSeekModel', model);
+      }
     }
     
     // 更新当前显示
@@ -335,7 +371,8 @@ function saveApiKey() {
     updateProviderStatus(currentProvider, apiKey);
     
     // 关闭弹窗
-    document.getElementById("apiKeyModal").style.display = "none";
+    const modal = document.getElementById("apiKeyModal");
+    modal.classList.add('hidden');
   } else {
     alert("请输入有效的 API Key");
   }
@@ -380,13 +417,14 @@ function switchProvider(provider) {
 
 // 取消API Key设置
 function cancelApiKeySetting() {
-  document.getElementById("apiKeyModal").style.display = "none";
+  const modal = document.getElementById("apiKeyModal");
+  modal.classList.add('hidden');
 }
 
 // 加载提示词列表
 function loadPrompts() {
   // 尝试从主进程获取提示词列表
-  ipcRenderer.invoke('getPrompts')
+  window.electron.invoke('getPrompts')
     .then(savedPrompts => {
       console.log("从主进程获取提示词:", savedPrompts);
       
@@ -406,20 +444,20 @@ function loadPrompts() {
             console.log("成功解析本地存储中的提示词:", prompts);
             
             // 同步到主进程
-            ipcRenderer.send('savePrompts', prompts);
+            window.electron.send('savePrompts', prompts);
           } catch (error) {
             console.error("解析本地存储中的提示词时出错:", error);
             // 如果解析出错，使用默认提示词
             localStorage.setItem('prompts', JSON.stringify(prompts));
             // 同步到主进程
-            ipcRenderer.send('savePrompts', prompts);
+            window.electron.send('savePrompts', prompts);
           }
         } else {
           console.log("本地存储中没有提示词，使用默认提示词");
           // 如果本地存储中没有提示词，使用默认提示词并保存到本地存储
           localStorage.setItem('prompts', JSON.stringify(prompts));
           // 同步到主进程
-          ipcRenderer.send('savePrompts', prompts);
+          window.electron.send('savePrompts', prompts);
         }
       }
       
@@ -548,14 +586,14 @@ function renderPromptsList() {
 function showAddPromptModal() {
   isEditMode = false;
   editingPromptId = null;
-  document.getElementById("addPromptModal").style.display = "block";
+  document.getElementById("addPromptModal").classList.remove('hidden');
   document.getElementById("newPromptName").value = "";
   document.getElementById("newPromptText").value = "";
 }
 
 // 隐藏添加提示词弹窗
 function hideAddPromptModal() {
-  document.getElementById("addPromptModal").style.display = "none";
+  document.getElementById("addPromptModal").classList.add('hidden');
   isEditMode = false;
   editingPromptId = null;
 }
@@ -582,7 +620,7 @@ function handleSavePrompt() {
       if (prompt.isActive) {
         document.getElementById("promptInput").value = text;
         // 保存到主进程
-        ipcRenderer.send("updatePrompt", text);
+        window.electron.send("updatePrompt", text);
       }
     }
   } else {
@@ -647,7 +685,7 @@ function savePrompts() {
   console.log("保存到本地存储完成");
   
   // 保存到主进程
-  ipcRenderer.send('savePrompts', prompts);
+  window.electron.send('savePrompts', prompts);
   console.log("保存到主进程完成");
   
   // 更新界面
@@ -690,7 +728,7 @@ function handlePromptSelect() {
   if (activePrompt) {
     document.getElementById("promptInput").value = activePrompt.text;
     // 保存到主进程
-    ipcRenderer.send("updatePrompt", activePrompt.text);
+    window.electron.send("updatePrompt", activePrompt.text);
   }
   
   // 更新列表显示
@@ -705,60 +743,42 @@ function simulateTranslation() {
   
   // 这里只是模拟，实际应用中应该调用真实的翻译API
   const sampleText = "这是一个模拟的翻译结果。在实际应用中，这里会显示通过选定的模型（" + modelSelect + "）翻译的文本。";
-  document.getElementById("translatedText").value = sampleText;
+  
+  // 直接调用与真实翻译相同的处理方式
+  const translatedTextArea = document.getElementById("translatedText");
+  translatedTextArea.value = sampleText;
+  
+  // 添加动画效果以提醒用户翻译已完成
+  translatedTextArea.classList.add("translation-complete");
+  
+  // 聚焦到翻译结果区域并选中所有文本
+  translatedTextArea.focus();
+  translatedTextArea.select();
+  
+  // 移除动画类，为下次翻译做准备
+  setTimeout(() => {
+    translatedTextArea.classList.remove("translation-complete");
+  }, 2000);
   
   // 也可以通过IPC调用主进程进行实际翻译
   // ipcRenderer.send("translate", { text: "要翻译的文本", model: modelSelect });
 }
 
-// 切换主题（暗色/亮色）
-function toggleTheme() {
-  document.body.classList.toggle("dark-theme");
-  
-  // 更新主题图标
-  const themeBtn = document.getElementById("themeToggleBtn");
-  if (document.body.classList.contains("dark-theme")) {
-    themeBtn.querySelector(".btn-icon").textContent = "☀️";
-  } else {
-    themeBtn.querySelector(".btn-icon").textContent = "🌙";
-  }
-}
-
 // 重置提示词列表为预设值
 function resetPrompts() {
-  if (confirm("确定要重置提示词列表吗？这将删除所有自定义提示词。")) {
-    // 重置为预设的提示词
-    prompts = [
-      {
-        id: "default",
-        name: "默认英文翻译",
-        text: "Please translate this Chinese text to English, only return the translation:",
-        isActive: true
-      },
-      {
-        id: "formal",
-        name: "正式商务",
-        text: "Please translate this Chinese text to formal Business English. Use professional vocabulary, maintain a respectful tone, and ensure the language is appropriate for corporate communications or official documents,only return the translation:",
-        isActive: false
-      },
-      {
-        id: "casual",
-        name: "日常口语",
-        text: "Please translate this Chinese text to casual, conversational English. Use everyday expressions, contractions, and a friendly tone that would be appropriate for informal conversations with friends,only return the translation:",
-        isActive: false
-      }
-    ];
-    
-    // 保存到本地存储
-    localStorage.setItem('prompts', JSON.stringify(prompts));
-    
-    // 保存到主进程
-    ipcRenderer.send('savePrompts', prompts);
-    
-    // 更新界面
-    updatePromptSelect();
-    renderPromptsList();
-    
-    alert("提示词列表已重置为预设值。");
+  if (!confirm("确定要重置提示词列表吗？这将删除所有自定义提示词。")) {
+    return;
   }
+  
+  prompts = [...DEFAULT_PROMPTS];
+  
+  // 保存到本地存储和主进程
+  localStorage.setItem('prompts', JSON.stringify(prompts));
+  window.electron.send('savePrompts', prompts);
+  
+  // 更新界面
+  updatePromptSelect();
+  renderPromptsList();
+  
+  alert("提示词列表已重置为预设值。");
 }

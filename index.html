@@ -2,25 +2,22 @@
 <html lang="zh">
 <head>
 <meta charset="UTF-8">
-<title>快捷翻译工具</title>
+<title>Tap2translate</title>
 <link rel="stylesheet" href="styles.css">
 <script defer src="renderer.js"></script>
 </head>
 <body>
-<div class="header">
-  <div class="app-title">快捷翻译工具</div>
+<header class="header">
+  <div class="app-title">Tap2translate</div>
   <div class="header-actions">
-    <button id="apiKeyBtn" class="header-btn">
-      <span class="btn-icon">🔑</span>
+    <button id="apiKeyBtn" class="header-btn" aria-label="设置 API Key">
+      <span class="btn-icon" aria-hidden="true">🔑</span>
       API Key
     </button>
-    <button id="themeToggleBtn" class="header-btn">
-      <span class="btn-icon">🌙</span>
-    </button>
   </div>
-</div>
+</header>
 
-<div class="container">
+<main class="container">
   <div class="top-settings-row">
     <div class="settings-section shortcut-section">
       <h2>快捷键设置</h2>
@@ -84,10 +81,14 @@
       <button id="translateBtn" class="translate-btn">模拟翻译</button>
     </div>
   </div>
-</div>
+</main>
+
+<footer class="footer">
+  <p>欢迎关注开源项目：<a href="https://github.com/LizabethLi/LizabethLi" target="_blank">@https://github.com/LizabethLi/LizabethLi</a></p>
+</footer>
 
 <!-- API Key 输入弹窗 -->
-<div id="apiKeyModal" class="modal">
+<div id="apiKeyModal" class="modal hidden">
   <div class="modal-content api-key-modal">
     <h2>API Key 与模型管理</h2>
     
@@ -108,23 +109,9 @@
     <!-- OpenRouter设置面板 -->
     <div class="provider-settings" id="openRouterSettings">
       <div class="provider-title">OpenRouter</div>
-      <button class="setup-btn">设置</button>
-      
+      <!-- <button class="setup-btn">设置</button> -->
       <div class="setting-item">
-        <label>当前 API Key:</label>
-        <div class="password-input-container">
-          <input type="password" id="currentApiKey" value="" readonly>
-          <button class="toggle-password-btn"><span class="eye-icon">👁️</span></button>
-        </div>
-      </div>
-      
-      <div class="setting-item">
-        <label>当前模型:</label>
-        <input type="text" id="currentModel" value="openai/gpt-4o" readonly>
-      </div>
-      
-      <div class="setting-item">
-        <label>更新您的 API Key</label>
+        <label>请输入您的 API Key</label>
         <div class="password-input-container">
           <input type="password" id="newApiKey" placeholder="输入 API Key">
           <button class="toggle-password-btn"><span class="eye-icon">👁️</span></button>
@@ -132,42 +119,59 @@
       </div>
       
       <div class="setting-item">
-        <label>模型名称:</label>
-        <input type="text" id="newModel" placeholder="openai/gpt-4o">
+        <label>请输入你想要的模型名称:</label>
+        <input type="text" id="newModel" placeholder="例如: openai/gpt-4o, anthropic/claude-3-opus">
       </div>
-    </div>
-    
-    <!-- DeepSeek设置面板 -->
-    <div class="provider-settings hidden" id="deepSeekSettings">
-      <div class="provider-title">DeepSeek</div>
-      <button class="setup-btn">设置</button>
       
       <div class="setting-item">
         <label>当前 API Key:</label>
         <div class="password-input-container">
-          <input type="password" id="currentDeepSeekApiKey" value="" readonly>
+          <input type="password" id="currentApiKey" value="" placeholder="尚未设置 API Key" readonly>
           <button class="toggle-password-btn"><span class="eye-icon">👁️</span></button>
         </div>
       </div>
       
       <div class="setting-item">
         <label>当前模型:</label>
-        <input type="text" id="currentDeepSeekModel" value="deepseek-chat" readonly>
+        <input type="text" id="currentModel" value="" placeholder="尚未设置模型" readonly>
       </div>
       
+
+    </div>
+    
+    <!-- DeepSeek设置面板 -->
+    <div class="provider-settings hidden" id="deepSeekSettings">
+      <div class="provider-title">DeepSeek</div>
+      <!-- <button class="setup-btn">设置</button> -->
+
+        <div class="setting-item">
+          <label>请输入您的 API Key</label>
+          <div class="password-input-container">
+            <input type="password" id="newDeepSeekApiKey" placeholder="输入 API Key">
+            <button class="toggle-password-btn"><span class="eye-icon">👁️</span></button>
+          </div>
+        </div>
+        
+        <div class="setting-item">
+          <label>请输入你想要的模型名称:</label>
+          <input type="text" id="newDeepSeekModel" placeholder="例如: deepseek-chat, deepseek-coder">
+        </div>
+      
+      
       <div class="setting-item">
-        <label>更新您的 API Key</label>
+        <label>当前 API Key:</label>
         <div class="password-input-container">
-          <input type="password" id="newDeepSeekApiKey" placeholder="输入 API Key">
+          <input type="password" id="currentDeepSeekApiKey" value="" placeholder="尚未设置 API Key" readonly>
           <button class="toggle-password-btn"><span class="eye-icon">👁️</span></button>
         </div>
       </div>
       
       <div class="setting-item">
-        <label>模型名称:</label>
-        <input type="text" id="newDeepSeekModel" placeholder="deepseek-chat">
+        <label>当前模型:</label>
+        <input type="text" id="currentDeepSeekModel" value="" placeholder="尚未设置模型" readonly>
       </div>
     </div>
+
     
     <div class="modal-buttons">
       <button id="cancelApiKeyBtn" class="cancel-btn">取消</button>
@@ -176,17 +180,24 @@
   </div>
 </div>
 
-<!-- 添加提示词弹窗 -->
-<div id="addPromptModal" class="modal">
+<!-- Add Prompt Modal -->
+<div id="addPromptModal" class="modal hidden">
   <div class="modal-content">
-    <h2>添加新提示词</h2>
-    <input type="text" id="newPromptName" placeholder="提示词名称">
-    <textarea id="newPromptText" placeholder="提示词内容"></textarea>
+    <h2>添加提示词</h2>
+    <div class="setting-item">
+      <label>提示词名称:</label>
+      <input type="text" id="newPromptName" placeholder="输入提示词名称">
+    </div>
+    <div class="setting-item">
+      <label>提示词内容:</label>
+      <textarea id="newPromptText" placeholder="输入提示词内容"></textarea>
+    </div>
     <div class="modal-buttons">
-      <button id="cancelAddPromptBtn">取消</button>
-      <button id="savePromptBtn">保存</button>
+      <button id="cancelAddPromptBtn" class="cancel-btn">取消</button>
+      <button id="savePromptBtn" class="save-btn">保存</button>
     </div>
   </div>
 </div>
+
 </body>
 </html>
