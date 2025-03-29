@@ -11,6 +11,7 @@ dist/
 build/
 out/
 release/
+release_new/
 *.exe
 *.dmg
 *.AppImage

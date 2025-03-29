@@ -1,5 +1,5 @@
 {
-  "name": "tap2translate",
+  "name": "copy2translate",
   "version": "1.0.0",
   "main": "main.js",
   "scripts": {
@@ -12,9 +12,9 @@
     "dist:win": "electron-builder --win"
   },
   "keywords": [],
-  "author": "Your Name",
-  "license": "ISC",
-  "description": "A translation app that helps you translate text with one click",
+  "author": "Liz Li",
+  "license": "MIT",
+  "description": "A translation app that helps you translate text with custom shortcut keys",
   "dependencies": {
     "axios": "^1.8.2",
     "clipboardy": "^4.0.0",
@@ -40,13 +40,15 @@
         "dmg",
         "zip"
       ],
-      "icon": "build/icon.icns"
+      "icon": "build/icon.icns",
+      "artifactName": "Copy2Translate.${ext}"
     },
     "win": {
       "target": [
         "nsis"
       ],
-      "icon": "build/icon.ico"
+      "icon": "build/icon.ico",
+      "artifactName": "Copy2Translate-Setup.${ext}"
     },
     "linux": {
       "target": [
@@ -55,7 +57,7 @@
       "icon": "build/icon.png"
     },
     "directories": {
-      "output": "dist"
+      "output": "release_new"
     },
     "files": [
       "main.js",
@@ -66,12 +68,6 @@
       "*.svg",
       "build/**/*",
       "node_modules/**/*"
-    ],
-    "extraResources": [
-      {
-        "from": ".env.example",
-        "to": ".env.example"
-      }
     ],
     "asarUnpack": [],
     "npmRebuild": false
