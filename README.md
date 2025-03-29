@@ -41,7 +41,6 @@ Copy2Translate 是一个简单高效的翻译工具，旨在通过复制文本�
 
 4. 构建应用(如果想要自己封装成应用)
    ```bash
-   npm run dist        # 构建所有平台
    npm run dist:mac    # 仅构建 macOS
    npm run dist:win    # 仅构建 Windows
    ```
@@ -167,7 +166,6 @@ If you want to develop or modify this project locally, make sure you have Node.j
 
 4. Build the application (if you want to package it yourself)
    ```bash
-   npm run dist        # Build for all platforms
    npm run dist:mac    # Build for macOS only
    npm run dist:win    # Build for Windows only
    ```

@@ -90,7 +90,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // 监听显示 API key 输入提示
   window.electron.receive("showApiKeyPrompt", () => {
-    document.getElementById("apiKeyModal").style.display = "block";
+    document.getElementById("apiKeyModal").classList.remove('hidden');
   });
 
   // 翻译结果接收
