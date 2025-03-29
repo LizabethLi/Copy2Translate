@@ -29,8 +29,8 @@
     "electron-builder": "^25.1.8"
   },
   "build": {
-    "appId": "com.tap2translate.app",
-    "productName": "Tap2Translate",
+    "appId": "com.copy2translate.app",
+    "productName": "Copy2Translate",
     "copyright": "Copyright © 2024 Your Name",
     "asar": true,
     "compression": "maximum",

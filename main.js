@@ -23,7 +23,7 @@ function showNotification(title, body) {
         title,
         body,
         silent: false,
-        subtitle: process.platform === 'darwin' ? 'Tap2Translate' : undefined, // macOS特有属性
+        subtitle: process.platform === 'darwin' ? 'Copy2translate' : undefined, // macOS特有属性
         icon: process.platform === 'darwin' ? undefined : path.join(__dirname, 'icon.png'),
         timeoutType: 'default'
       });
@@ -162,8 +162,8 @@ async function translateText(text) {
         headers: {
           "Content-Type": "application/json",
           "Authorization": `Bearer ${apiKey}`,
-          "HTTP-Referer": "https://tap2translate.app", // 替换为你的应用域名
-          "X-Title": "Tap2Translate"
+          "HTTP-Referer": "https://copy2translate.app", // 替换为你的应用域名
+          "X-Title": "Copy2Translate"
         }
       }
     );
@@ -193,7 +193,7 @@ app.whenReady().then(() => {
   if (process.platform === 'darwin') {
     // macOS 不需要设置 AppUserModelId，这仅在 Windows 上才需要
     // 设置应用名称，这在 macOS 上对于通知很重要
-    app.name = 'Tap2Translate';
+    app.name = 'Copy2translate';
     
     // 如果使用Electron v9+，可以检查通知权限
     if (Notification.isSupported()) {
@@ -204,7 +204,7 @@ app.whenReady().then(() => {
     }
   } else if (process.platform === 'win32') {
     // 在 Windows 上设置应用 ID
-    app.setAppUserModelId('com.tap2translate.app');
+    app.setAppUserModelId('com.copy2translate.app');
   }
 
   // 创建主窗口

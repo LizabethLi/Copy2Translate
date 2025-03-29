@@ -19,7 +19,7 @@ exports.default = async function notarizing(context) {
 
   try {
     await notarize({
-      appBundleId: 'com.tap2translate.app',
+      appBundleId: 'com.copy2translate.app',
       appPath,
       appleId: process.env.APPLE_ID,
       appleIdPassword: process.env.APPLE_ID_PASSWORD,
