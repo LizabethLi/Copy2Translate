@@ -39,13 +39,13 @@ Copy2Translate 是一个简单高效的翻译工具，旨在通过复制文本�
    ```
    
 
-4. 构建应用(如果想要自己封装成应用)
+4. 构建应用(如果想要自己封装成应用软件，如 macbook 的 dmg文件，windows 的 exe 文件)
    ```bash
    npm run dist:mac    # 仅构建 macOS
    npm run dist:win    # 仅构建 Windows
    ```
 
-## 软件安装说明（如果自己封装成了应用，或者获取了已经封装好的应用）
+## 软件安装说明（如果自己封装成了应用软件，或者获取了已经封装好的应用）
 
 ### Windows 用户
 1. 下载最新的 `Copy2Translate-Setup.exe`
@@ -116,11 +116,7 @@ Copy2Translate 是一个简单高效的翻译工具，旨在通过复制文本�
 
 ## 商业使用与署名
 
-本项目基于 MIT 许可证开源，您可以自由地使用、修改和分发，包括商业用途。
-
-如果您计划将 Copy2Translate 用于商业产品或服务中，我们非常欢迎。
-
-此外，如果您在商业项目或公开场合（如技术分享、博客文章等）使用了本项目的代码或设计，请考虑在适当的位置（例如项目文档、关于页面、致谢部分）提及本项目名称 (Copy2Translate) 并附上 GitHub 仓库链接 [https://github.com/LizabethLi/Copy2Translate](https://github.com/LizabethLi/Copy2Translate)。这不仅是对我们工作的认可，也有助于更多人发现和使用这个工具。
+本项目基于 MIT 许可证开源，您可以自由地使用、修改和分发。如果您在商业项目或公开场合（如技术分享、博客文章等）使用了本项目的代码或设计，请考虑在适当的位置（例如项目文档、关于页面、致谢部分）提及本项目名称 (Copy2Translate) 并附上 GitHub 仓库链接 [https://github.com/LizabethLi/Copy2Translate](https://github.com/LizabethLi/Copy2Translate)。这不仅是对我的工作的认可，也有助于更多人发现和使用这个工具。
 
 ## 问题反馈
 
@@ -164,7 +160,7 @@ If you want to develop or modify this project locally, make sure you have Node.j
    npm start
    ```
 
-4. Build the application (if you want to package it yourself)
+4. Build the application (if you want to package it yourself, such as dmg file for macbook or exe file for windows)
    ```bash
    npm run dist:mac    # Build for macOS only
    npm run dist:win    # Build for Windows only
@@ -238,11 +234,7 @@ If you want to develop or modify this project locally, make sure you have Node.j
 
 ## Commercial Use and Attribution
 
-This project is open-sourced under the MIT license, and you are free to use, modify, and distribute it, including for commercial purposes.
-
-If you plan to use Copy2Translate in a commercial product or service, we highly welcome it.
-
-Additionally, if you use the code or design of this project in a commercial project or public setting (such as technical sharing, blog articles, etc.), please consider mentioning the project name (Copy2Translate) and including a link to the GitHub repository [https://github.com/LizabethLi/Copy2Translate](https://github.com/LizabethLi/Copy2Translate) in an appropriate location (such as project documentation, about page, acknowledgments section). This not only recognizes our work but also helps more people discover and use this tool.
+This project is open-sourced under the MIT license, and you are free to use, modify, and distribute it. If you use the code or design of this project in a commercial project or public setting (such as technical sharing, blog articles, etc.), please consider mentioning the project name (Copy2Translate) and including a link to the GitHub repository [https://github.com/LizabethLi/Copy2Translate](https://github.com/LizabethLi/Copy2Translate) in an appropriate location (such as project documentation, about page, acknowledgments section). This not only recognizes my work but also helps more people discover and use this tool.
 
 ## Feedback
 
