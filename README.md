@@ -58,12 +58,10 @@ Copy2Translate 是一个简单高效的翻译工具，旨在通过复制文本�
 3. 将 `Copy2Translate.app` 拖到 `Applications` 文件夹
 
 > **注意**：由于应用未经 Apple 开发者签名认证，macOS 可能会阻止应用运行。
-> 
-> **解决方法 1 (推荐):** 首次运行时，按住 `Control` 键点击应用图标，然后选择"打开"。在弹出的对话框中再次点击"打开"。之后就可以正常启动了。或者，前往"系统设置" > "隐私与安全性"，向下滚动找到相关提示，并点击"仍要打开"。
-> 
-> **解决方法 2 (终端命令):** 如果您熟悉终端，可以将应用拖入 `Applications` 文件夹后，打开"终端"应用，执行以下命令（需要输入您的 Mac 密码）：
+![Error](./images/error.jpg)  
+您可以将应用拖入 `Applications` 文件夹后，打开"终端"应用，执行以下命令：
 > ```bash
-> sudo xattr -rd com.apple.quarantine /Applications/Copy2Translate.app
+> xattr -rd com.apple.quarantine /Applications/Copy2Translate.app
 > ```
 > 这会移除应用的隔离属性，之后即可双击打开。
 > 
@@ -73,7 +71,7 @@ Copy2Translate 是一个简单高效的翻译工具，旨在通过复制文本�
 ## 使用方法
 
 1. 首次运行时，需要设置 API Key
-2. 默认快捷键为 `Command+Shift+T`（macOS）或 `Ctrl+Alt+T`（Windows/Linux）
+2. 默认快捷键为 `Command+Shift+T`（macOS）或 `Ctrl+Alt+T`（Windows/Linux）,如果默认快捷键失效，您可以自己设置快捷键即可
 3. 选中要翻译的文本并复制
 4. 按下快捷键即可翻译
 5. 翻译结果会自动复制到剪贴板，直接粘贴即可，不需要离开当前的编辑页面
@@ -178,13 +176,13 @@ If you want to develop or modify this project locally, make sure you have Node.j
 2. Double-click to open the DMG file
 3. Drag the application to the Applications folder
 
-> **Note**: Since the application is not signed by an Apple developer, macOS may block the application from running.
+> **Note**: Since the application is not signed by an Apple developer, macOS may block the application from running. You may come accross error like this:
+
+![Error](./images/error.jpg)  
 > 
-> **Solution 1 (Recommended):** When running for the first time, press the `Control` key while clicking the application icon, then select "Open". In the dialog that appears, click "Open" again. After that, you can start normally. Alternatively, go to "System Settings" > "Security & Privacy", scroll down to the relevant prompt, and click "Still Open".
-> 
-> **Solution 2 (Terminal Command):** If you are familiar with the terminal, you can drag the application to the "Applications" folder, then open the "Terminal" application, and execute the following command (you will need to enter your Mac password):
+You can drag the application to the "Applications" folder, then open the "Terminal" application, and execute the following command:
 > ```bash
-> sudo xattr -rd com.apple.quarantine /Applications/Copy2Translate.app
+> xattr -rd com.apple.quarantine /Applications/Copy2Translate.app
 > ```
 > This will remove the application's quarantine attribute, after which you can double-click to open it.
 > 
@@ -193,7 +191,7 @@ If you want to develop or modify this project locally, make sure you have Node.j
 ## Usage
 
 1. When running for the first time, you need to set the API Key
-2. The default hotkey is `Command+Shift+T` (macOS) or `Ctrl+Alt+T` (Windows/Linux)
+2. The default hotkey is `Command+Shift+T` (macOS) or `Ctrl+Alt+T` (Windows/Linux). If the default shortcut keys do not work, you can set your own shortcut keys.
 3. Select the text you want to translate and copy it
 4. Press the hotkey to translate
 5. The translation result will be automatically copied to the clipboard, simply paste it without leaving the current editing page
