@@ -31,7 +31,7 @@
   "build": {
     "appId": "com.copy2translate.app",
     "productName": "Copy2Translate",
-    "copyright": "Copyright © 2024 Your Name",
+    "copyright": "Copyright © Liz Li",
     "asar": true,
     "compression": "maximum",
     "mac": {
