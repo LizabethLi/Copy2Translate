@@ -140,7 +140,7 @@ async function translateText(text) {
       httpsAgent: new https.Agent({
         rejectUnauthorized: false
       }),
-      timeout: 10000
+      timeout: 30000
     });
 
     console.log('Sending request to OpenRouter API...');
